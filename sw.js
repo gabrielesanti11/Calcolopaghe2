@@ -1,4 +1,4 @@
-const CACHE = "cpa-apmal-v1.0.2"; // cambia versione quando fai update
+const CACHE_NAME = "cpa-apmal-v7"; // cambia versione quando aggiorni
 const ASSETS = [
   "./",
   "./index.html",
@@ -7,36 +7,41 @@ const ASSETS = [
   "./pagheicon-512.png",
 ];
 
-self.addEventListener("install", (e) => {
+self.addEventListener("install", (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
+  );
   self.skipWaiting();
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)));
 });
 
-self.addEventListener("activate", (e) => {
-  e.waitUntil((async () => {
-    const keys = await caches.keys();
-    await Promise.all(keys.map(k => (k !== CACHE ? caches.delete(k) : null)));
-    await self.clients.claim();
-  })());
+self.addEventListener("activate", (event) => {
+  event.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(keys.map(k => (k !== CACHE_NAME ? caches.delete(k) : null)))
+    )
+  );
+  self.clients.claim();
 });
 
-// network-first per navigazioni (index)
-self.addEventListener("fetch", (e) => {
-  const req = e.request;
+self.addEventListener("fetch", (event) => {
+  const req = event.request;
 
+  // Navigazione (index) -> network-first (così non “resta incastrata”)
   if (req.mode === "navigate") {
-    e.respondWith((async () => {
-      try {
-        const fresh = await fetch(req);
-        const cache = await caches.open(CACHE);
-        cache.put("./index.html", fresh.clone());
-        return fresh;
-      } catch (err) {
-        return (await caches.match("./index.html")) || (await caches.match("./"));
-      }
-    })());
+    event.respondWith(
+      fetch(req)
+        .then((res) => {
+          const copy = res.clone();
+          caches.open(CACHE_NAME).then((c) => c.put("./index.html", copy));
+          return res;
+        })
+        .catch(() => caches.match("./index.html"))
+    );
     return;
   }
 
-  e.respondWith(caches.match(req).then(r => r || fetch(req)));
+  // Altri asset -> cache-first
+  event.respondWith(
+    caches.match(req).then((cached) => cached || fetch(req))
+  );
 });
