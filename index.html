@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>CPA·APMAL – Calcolatore</title>
 
-  <!-- PWA: QUESTE RIGHE DEVONO ESISTERE -->
+  <!-- PWA -->
   <link rel="manifest" href="./manifest.webmanifest">
   <meta name="theme-color" content="#0f172a">
 
@@ -82,6 +82,7 @@
     .extra-row:last-child{border-bottom:none;}
     .tot-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(148,163,184,.05);font-size:.78rem;}
     .tot-row:last-child{border-bottom:none;}
+    .rules{font-size:.65rem;color:var(--muted);margin-top:6px;}
     .small-hint{font-size:.63rem;color:var(--muted);margin-top:4px;}
     .taglist{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;}
     .tag{background:rgba(148,163,184,.08);border:1px solid rgba(148,163,184,.12);border-radius:999px;padding:2px 10px;font-size:.6rem;}
@@ -95,6 +96,7 @@
 <body>
   <div class="app">
     <h1>CPA·APMAL</h1>
+    <p class="subtitle">produzione • intervallo di date • extra 2×2 • mezza giornata</p>
 
     <div class="card">
       <label for="prod-name">Produzione</label>
@@ -108,8 +110,7 @@
         <option value="capo-ele">Capo Elettricista</option>
         <option value="capo-mac">Capo Macchinista</option>
         <option value="capo-att">Capo Attrezzista</option>
-        <option value="assist-ele">Assistente Elettricista</option>
-        <option value="assist-mac">Assistente Macchinista</option>
+        <option value="aiuto-ele">Aiuto Elettricista</option>
         <option value="operator">Operatore mdp / Steady</option>
         <option value="assist-cam">1AC / Focus Puller</option>
         <option value="dit">DIT / Video Assist</option>
@@ -127,7 +128,7 @@
           <label for="range-end">Data fine lavoro</label>
           <input id="range-end" type="date">
         </div>
-        <button class="btn-small" id="genRangeBtn" style="margin-top:0;">Genera</button>
+        <button class="btn-small" id="genRangeBtn" style="margin-top:0;" type="button">Genera</button>
       </div>
       <div id="plan-tags" class="taglist"></div>
 
@@ -141,12 +142,6 @@
         <input type="checkbox" id="half-day">
         <label for="half-day">Mezza giornata (½ paga, senza orari né extra)</label>
       </div>
-
-      <div class="chk-line" style="margin-bottom:6px;">
-        <input type="checkbox" id="nine-plus-one">
-        <label for="nine-plus-one">9+1 (base 9h di lavoro + 1h di pausa)</label>
-      </div>
-
       <div class="chk-line" style="margin-bottom:12px;">
         <input type="checkbox" id="fattura-30">
         <label for="fattura-30">+ 30% in fattura</label>
@@ -170,11 +165,13 @@
           <input id="end" type="time" step="900">
         </div>
       </div>
-      <button class="btn-primary" id="calcBtn" onclick="onCalcClick()">CALCOLA</button>
+
+      <button class="btn-primary" id="calcBtn" type="button">CALCOLA</button>
+
       <div class="btn-row">
-        <button class="btn-small" id="addDayBtn">+ Aggiungi giornata</button>
-        <button class="btn-small" id="showReportBtn">Riepilogo giornate</button>
-        <button class="btn-small" id="savePdfBtn">Salva PDF</button>
+        <button class="btn-small" id="addDayBtn" type="button">+ Aggiungi giornata</button>
+        <button class="btn-small" id="showReportBtn" type="button">Riepilogo giornate</button>
+        <button class="btn-small" id="savePdfBtn" type="button">Salva PDF</button>
       </div>
     </div>
 
@@ -186,34 +183,56 @@
 
       <div class="extra-grid">
         <div class="extra-box" data-key="day-simple">
-          <div class="badge-ex">EX</div>
+          <div class="badge-ex">
+            EX
+            <svg viewBox="0 0 100 50"><circle cx="50" cy="25" r="19" stroke-width="3" fill="none"></circle></svg>
+          </div>
           <div class="extra-title">Extra singolo</div>
           <div class="extra-val" id="ex-simple">0:00</div>
         </div>
+
         <div class="extra-box" data-key="day-double">
-          <div class="badge-ex">EX</div>
+          <div class="badge-ex">
+            EX
+            <svg viewBox="0 0 100 50"><circle cx="50" cy="25" r="19" stroke-width="3" fill="none"></circle></svg>
+          </div>
           <div class="extra-title">Extra doppio</div>
           <div class="extra-val" id="ex-double">0:00</div>
         </div>
+
         <div class="extra-box" data-key="night-simple">
-          <div class="badge-ex">EX</div>
+          <div class="badge-ex">
+            EX
+            <svg viewBox="0 0 100 50"><circle cx="50" cy="25" r="19" stroke-width="3" fill="none"></circle></svg>
+          </div>
           <div class="extra-title">Notturno singolo</div>
           <div class="extra-val" id="ex-night">0:00</div>
         </div>
+
         <div class="extra-box" data-key="night-double">
-          <div class="badge-ex">EX</div>
+          <div class="badge-ex">
+            EX
+            <svg viewBox="0 0 100 50"><circle cx="50" cy="25" r="19" stroke-width="3" fill="none"></circle></svg>
+          </div>
           <div class="extra-title">Notturno doppio</div>
           <div class="extra-val" id="ex-night-double">0:00</div>
         </div>
       </div>
 
       <div class="extra-row" data-key="pause-miss">
-        <div class="badge-ex">EX</div>
+        <div class="badge-ex">
+          EX
+          <svg viewBox="0 0 100 50"><circle cx="50" cy="25" r="19" stroke-width="3" fill="none"></circle></svg>
+        </div>
         <div class="extra-title">Mancata pausa (+1h semplice)</div>
         <div class="extra-val" id="ex-pause">0:00</div>
       </div>
+
       <div class="extra-row" data-key="cont">
-        <div class="badge-ex">EX</div>
+        <div class="badge-ex">
+          EX
+          <svg viewBox="0 0 100 50"><circle cx="50" cy="25" r="19" stroke-width="3" fill="none"></circle></svg>
+        </div>
         <div class="extra-title">Continuato (base 7h)</div>
         <div class="extra-val" id="ex-cont">NO</div>
       </div>
@@ -227,12 +246,18 @@
       <div class="tot-row" style="font-weight:700;"><span>TOTALE LORDO</span><span id="tot-all">€ 0,00</span></div>
     </div>
 
+    <p class="rules">Regole: notturno se si inizia ≥16:00 oppure ore dopo le 22:00; continuato se pausa assente o dopo 7h; “Mezza giornata” = metà paga ruolo, senza extra.</p>
     <p id="status-msg"></p>
   </div>
 
-  <audio id="coin-snd" src="level-up-08-402152.mp3" preload="auto"></audio>
-
   <script>
+    // ✅ PWA: registra sw.js esterno (niente blob)
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./sw.js");
+      });
+    }
+
     function setStatus(msg, type){
       const el=document.getElementById("status-msg");
       el.textContent=msg||"";
@@ -267,20 +292,41 @@
       "capo-ele":{label:"Capo Elettricista",base:370,s:65,d:130,n:90,nightBase:500,nightSimple:90,nightDouble:180},
       "capo-mac":{label:"Capo Macchinista",base:370,s:65,d:130,n:90,nightBase:500,nightSimple:90,nightDouble:180},
       "capo-att":{label:"Capo Attrezzista",base:370,s:65,d:130,n:90,nightBase:500,nightSimple:90,nightDouble:180},
-      "assist-ele":{label:"Assistente Elettricista",base:300,s:50,d:100,n:70},
-      "assist-mac":{label:"Assistente Macchinista",base:300,s:50,d:100,n:70},
+      "aiuto-ele":{label:"Aiuto Elettricista",base:300,s:50,d:100,n:70},
       "operator":{label:"Operatore mdp / Steady",base:600,s:100,d:200,n:135},
       "assist-cam":{label:"1AC / Focus Puller",base:370,s:65,d:130,n:90},
       "dit":{label:"DIT / Video Assist",base:340,s:60,d:120,n:80},
       "aiuto-op":{label:"2AC / Loader",base:300,s:50,d:100,n:70},
-      "cable":{label:"Cable Man",base:180,s:30,d:60,n:40}
+      "cable":{label:"Cable Man",base:180,s:30,d:60,n:40},
     };
 
-    let lastExtraMoney=0;
+    function setAnim(key,on){
+      const el=document.querySelector('[data-key="'+key+'"]');
+      if(!el)return;
+      const badge=el.querySelector(".badge-ex");
+      const circle=el.querySelector("svg circle");
+      if(!badge||!circle)return;
+
+      if(on){
+        circle.style.transition="none";
+        circle.style.strokeDashoffset=150;
+        badge.classList.add("active");
+        requestAnimationFrame(()=>{
+          circle.style.transition="stroke-dashoffset .45s ease-out";
+          circle.style.strokeDashoffset=0;
+        });
+      }else{
+        badge.classList.remove("active");
+        circle.style.transition="none";
+        circle.style.strokeDashoffset=150;
+      }
+    }
+
     let lastCalcSnapshot=null;
     const daysByWorker={};
     let plannedDates=[];
 
+    // init default
     (function(){
       const d=new Date();
       const t=d.toISOString().slice(0,10);
@@ -296,68 +342,103 @@
     document.getElementById("genRangeBtn").addEventListener("click",()=>{
       const s=document.getElementById("range-start").value;
       const e=document.getElementById("range-end").value;
-      if(!s||!e){ setStatus("Seleziona inizio e fine lavoro.", "warn"); return; }
-      const sd=strToLocalDate(s), ed=strToLocalDate(e);
-      if(sd>ed){ setStatus("La data di fine deve essere dopo quella di inizio.", "warn"); return; }
+      if(!s||!e){
+        setStatus("Seleziona inizio e fine lavoro.", "warn");
+        return;
+      }
+      const sd=strToLocalDate(s);
+      const ed=strToLocalDate(e);
+      if(sd>ed){
+        setStatus("La data di fine deve essere dopo quella di inizio.", "warn");
+        return;
+      }
       plannedDates=[];
       const cur=new Date(sd);
-      while(cur<=ed){ plannedDates.push(dateToStr(cur)); cur.setDate(cur.getDate()+1); }
-      const box=document.getElementById("plan-tags");
-      box.innerHTML="";
-      plannedDates.forEach(d=>{
-        const span=document.createElement("span");
-        span.className="tag"; span.textContent=d; box.appendChild(span);
-      });
+      while(cur<=ed){
+        plannedDates.push(dateToStr(cur));
+        cur.setDate(cur.getDate()+1);
+      }
+      renderPlanTags();
       document.getElementById("date").value=plannedDates[0]||s;
       setStatus("Intervallo generato.", "ok");
     });
 
-    const halfEl=document.getElementById("half-day");
-    const nineEl=document.getElementById("nine-plus-one");
+    function renderPlanTags(){
+      const box=document.getElementById("plan-tags");
+      box.innerHTML="";
+      plannedDates.forEach(d=>{
+        const span=document.createElement("span");
+        span.className="tag";
+        span.textContent=d;
+        box.appendChild(span);
+      });
+    }
 
-    halfEl.addEventListener("change",function(){
+    document.getElementById("half-day").addEventListener("change",function(){
       const grid=document.getElementById("time-grid");
-      if(this.checked){ nineEl.checked=false; grid.classList.add("disabled"); }
+      if(this.checked) grid.classList.add("disabled");
       else grid.classList.remove("disabled");
     });
-    nineEl.addEventListener("change",function(){
-      if(this.checked && halfEl.checked){ halfEl.checked=false; document.getElementById("time-grid").classList.remove("disabled"); }
-    });
-
-    function onCalcClick(){ doCalc(); }
 
     function doCalc(){
       setStatus("");
       const roleId=document.getElementById("role").value;
-      const r=roles[roleId];
       const rounder=document.getElementById("rounder").checked;
       const fattura=document.getElementById("fattura-30").checked;
-      const ninePlusOne=document.getElementById("nine-plus-one").checked;
+      const r=roles[roleId];
       const half=document.getElementById("half-day").checked;
 
+      if(!r){
+        setStatus("Tariffe mancanti per il ruolo selezionato.", "warn");
+        return;
+      }
+
       if(half){
-        let total=(r.base/2);
+        ["day-simple","day-double","night-simple","night-double","pause-miss","cont"].forEach(k=>setAnim(k,false));
+        let total=r.base/2;
         if(fattura) total*=1.3;
+
+        document.getElementById("ex-simple").textContent="0:00";
+        document.getElementById("ex-double").textContent="0:00";
+        document.getElementById("ex-night").textContent="0:00";
+        document.getElementById("ex-night-double").textContent="0:00";
+        document.getElementById("ex-pause").textContent="0:00";
+        document.getElementById("ex-cont").textContent="NO";
+
         document.getElementById("tot-base").textContent=euro(r.base/2);
         document.getElementById("tot-simple").textContent="€ 0,00";
         document.getElementById("tot-double").textContent="€ 0,00";
         document.getElementById("tot-night").textContent="€ 0,00";
         document.getElementById("tot-all").textContent=euro(total);
+
+        lastCalcSnapshot={
+          prod:document.getElementById("prod-name").value.trim(),
+          worker:document.getElementById("worker-name").value.trim()||"Senza nome",
+          roleId,
+          date:document.getElementById("date").value,
+          start:"MEZZA", pstart:"MEZZA", pend:"MEZZA", end:"MEZZA",
+          total, half:true, fattura
+        };
         return;
       }
 
-      const startVal=document.getElementById("start").value;
-      const pstartVal=document.getElementById("pstart").value;
-      const pendVal=document.getElementById("pend").value;
-      const endVal=document.getElementById("end").value;
+      let startVal=document.getElementById("start").value;
+      let pstartVal=document.getElementById("pstart").value;
+      let pendVal=document.getElementById("pend").value;
+      let endVal=document.getElementById("end").value;
 
-      if(!startVal || !endVal){ setStatus("Inserisci almeno orario di inizio e fine set.", "warn"); return; }
+      if(!startVal || !endVal){
+        setStatus("Inserisci almeno orario di inizio e fine set.", "warn");
+        return;
+      }
 
       let start=hhmmToMin(startVal);
       let pstart=pstartVal?hhmmToMin(pstartVal):start;
       let pend=pendVal?hhmmToMin(pendVal):pstart;
       let end=hhmmToMin(endVal);
       if(end<start) end+=24*60;
+
+      const dayIsNight=(start>=16*60);
 
       const hasPause=pstart<pend;
       const workBefore=hasPause?Math.max(0,pstart-start):Math.max(0,end-start);
@@ -366,16 +447,16 @@
 
       const cont=(!hasPause)||(pstart-start>7*60);
       document.getElementById("ex-cont").textContent=cont?"SI":"NO";
+      setAnim("cont",cont);
 
-      const baseMinutes = cont ? 7*60 : (ninePlusOne ? 9*60 : 8*60);
-
+      const baseMinutes=cont?7*60:8*60;
       let overtime=Math.max(0,totalWork-baseMinutes);
 
       const nightStart=22*60;
       let nightMin=0;
       const intervals=hasPause?[[start,pstart],[pend,end]]:[[start,end]];
       intervals.forEach(([a,b])=>{
-        if(b<=nightStart) return;
+        if(b<=nightStart)return;
         const from=Math.max(a,nightStart);
         if(b>from) nightMin+=b-from;
       });
@@ -383,10 +464,11 @@
       let nightExtra=Math.min(overtime,nightMin);
       overtime-=nightExtra;
 
-      let extraSimple=0, extraDouble=0;
+      let extraSimple=0,extraDouble=0;
       if(overtime>0){
         const sPart=Math.min(overtime,120);
-        extraSimple=sPart; overtime-=sPart;
+        extraSimple=sPart;
+        overtime-=sPart;
         if(overtime>0) extraDouble=overtime;
       }
 
@@ -398,24 +480,34 @@
       extraSimple=round30(extraSimple);
       extraDouble=round30(extraDouble);
 
+      document.getElementById("ex-night-double").textContent="0:00";
+      setAnim("night-double",false);
+
       document.getElementById("ex-simple").textContent=minToHHMM(extraSimple);
+      setAnim("day-simple",extraSimple>0);
+
       document.getElementById("ex-double").textContent=minToHHMM(extraDouble);
+      setAnim("day-double",extraDouble>0);
+
       document.getElementById("ex-night").textContent=minToHHMM(nightExtra);
+      setAnim("night-simple",nightExtra>0);
+
       document.getElementById("ex-pause").textContent=missMin?"1:00":"0:00";
+      setAnim("pause-miss",missMin>0);
 
       let basePay=r.base, rateSimple=r.s, rateDouble=r.d;
-      const dayIsNight=(start>=16*60);
       if(dayIsNight && r.nightBase){
-        basePay=r.nightBase; rateSimple=r.nightSimple; rateDouble=r.nightDouble;
+        basePay=r.nightBase;
+        rateSimple=r.nightSimple;
+        rateDouble=r.nightDouble;
       }
 
       let total=basePay;
       const moneySimple=rateSimple*(extraSimple/60);
       const moneyDouble=rateDouble*(extraDouble/60);
-      const moneyNight=r.n*(nightExtra/60);
-      const moneyMiss=missMin?rateSimple:0;
-      total += moneySimple+moneyDouble+moneyNight+moneyMiss;
-
+      const moneyNight =r.n*(nightExtra/60);
+      const moneyMiss  =missMin?rateSimple:0;
+      total+=moneySimple+moneyDouble+moneyNight+moneyMiss;
       if(fattura) total*=1.3;
 
       document.getElementById("tot-base").textContent=euro(basePay);
@@ -424,20 +516,145 @@
       document.getElementById("tot-night").textContent=euro(moneyNight);
       document.getElementById("tot-all").textContent=euro(total);
 
-      const extraMoneyNow=moneySimple+moneyDouble+moneyNight+moneyMiss;
-      if(extraMoneyNow>lastExtraMoney){
-        const a=document.getElementById("coin-snd");
-        if(a){ a.currentTime=0; a.play().catch(()=>{}); }
-      }
-      lastExtraMoney=extraMoneyNow;
+      lastCalcSnapshot={
+        prod:document.getElementById("prod-name").value.trim(),
+        worker:document.getElementById("worker-name").value.trim()||"Senza nome",
+        roleId,
+        date:document.getElementById("date").value,
+        start:startVal,
+        pstart:pstartVal||"-",
+        pend:pendVal||"-",
+        end:endVal,
+        total,
+        half:false,
+        fattura
+      };
     }
 
-    // ✅ Service Worker vero (file sw.js)
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("load", () => {
-        navigator.serviceWorker.register("./sw.js");
-      });
+    document.getElementById("calcBtn").addEventListener("click", doCalc);
+
+    function nextMissingDate(){
+      const saved=new Set();
+      Object.values(daysByWorker).forEach(arr=>arr.forEach(r=>saved.add(r.date)));
+      for(const d of plannedDates){
+        if(!saved.has(d)) return d;
+      }
+      return null;
     }
+
+    document.getElementById("addDayBtn").addEventListener("click",()=>{
+      if(!lastCalcSnapshot) doCalc();
+      if(!lastCalcSnapshot){
+        setStatus("Fai prima il calcolo per la giornata corrente.", "warn");
+        return;
+      }
+      const w=lastCalcSnapshot.worker;
+      if(!daysByWorker[w]) daysByWorker[w]=[];
+
+      const idx=daysByWorker[w].findIndex(x=>x.date===lastCalcSnapshot.date);
+      if(idx!==-1){
+        daysByWorker[w][idx]={...lastCalcSnapshot};
+        setStatus("Giornata aggiornata: "+lastCalcSnapshot.date, "ok");
+      }else{
+        daysByWorker[w].push({...lastCalcSnapshot});
+        setStatus("Giornata aggiunta: "+lastCalcSnapshot.date, "ok");
+      }
+
+      const nextDate=nextMissingDate();
+      if(nextDate) document.getElementById("date").value=nextDate;
+    });
+
+    function allPlannedDatesCovered(){
+      if(plannedDates.length===0) return true;
+      const saved=new Set();
+      Object.values(daysByWorker).forEach(arr=>arr.forEach(r=>saved.add(r.date)));
+      for(const d of plannedDates){
+        if(!saved.has(d)) return false;
+      }
+      return true;
+    }
+
+    function buildReportHtml(){
+      const prodName=document.getElementById("prod-name").value.trim()||"Produzione";
+      const allDates=new Set();
+      Object.values(daysByWorker).forEach(arr=>arr.forEach(r=>allDates.add(r.date)));
+      const sortedDates=Array.from(allDates).sort();
+      const rangeLabel=sortedDates.length?(sortedDates.length===1?sortedDates[0]:sortedDates[0]+" – "+sortedDates[sortedDates.length-1]):"";
+      let html="<!DOCTYPE html><html><head><meta charset='UTF-8'><title>Riepilogo</title><meta name='viewport' content='width=device-width,initial-scale=1'><style>body{font-family:system-ui,-apple-system,sans-serif;padding:18px 14px;}h2{margin-bottom:2px;}h3{margin-bottom:3px;}hr{margin:10px 0;}p{margin:2px 0;} .tot{font-weight:700;margin-top:4px;}</style></head><body>";
+      html+="<h2>"+prodName+(rangeLabel?" – "+rangeLabel:"")+"</h2>";
+      for(const worker in daysByWorker){
+        const entries=daysByWorker[worker];
+        if(!entries.length) continue;
+        html+="<h3>"+worker+"</h3>";
+        let partial=0;
+        entries.sort((a,b)=>a.date.localeCompare(b.date));
+        entries.forEach((d,i)=>{
+          const roleLabel=roles[d.roleId]?roles[d.roleId].label:d.roleId;
+          partial+=d.total;
+          html+="<p><strong>Giorno "+(i+1)+" – "+d.date+"</strong></p>";
+          html+="<p>Ruolo: "+roleLabel+"</p>";
+          if(d.half){
+            html+="<p>Mezza giornata</p>";
+          }else{
+            html+="<p>Inizio: "+d.start+" • Pausa: "+d.pstart+"-"+d.pend+" • Fine: "+d.end+"</p>";
+          }
+          html+="<p>€ "+d.total.toFixed(2).replace(".",",")+"</p><hr>";
+        });
+        html+="<p class='tot'>Totale "+worker+": € "+partial.toFixed(2).replace(".",",")+"</p><br>";
+      }
+      html+="</body></html>";
+      return html;
+    }
+
+    // ✅ apertura report robusta per PWA (se window.open è bloccato)
+    function openReport(html){
+      const blob=new Blob([html],{type:"text/html;charset=utf-8"});
+      const url=URL.createObjectURL(blob);
+
+      const win=window.open(url,"_blank");
+      if(win){
+        setTimeout(()=>URL.revokeObjectURL(url), 15000);
+        return;
+      }
+      // fallback: stessa finestra
+      window.location.href=url;
+      setTimeout(()=>URL.revokeObjectURL(url), 15000);
+    }
+
+    document.getElementById("showReportBtn").addEventListener("click",()=>{
+      if(!allPlannedDatesCovered()){
+        setStatus("Completa tutte le giornate generate prima del riepilogo.", "warn");
+        return;
+      }
+      openReport(buildReportHtml());
+      setStatus("Riepilogo generato.", "ok");
+    });
+
+    document.getElementById("savePdfBtn").addEventListener("click",()=>{
+      if(!allPlannedDatesCovered()){
+        setStatus("Completa tutte le giornate generate prima di salvare il PDF.", "warn");
+        return;
+      }
+      // In PWA Android spesso la stampa è limitata: apriamo il report e poi proviamo print
+      const html=buildReportHtml();
+      const blob=new Blob([html],{type:"text/html;charset=utf-8"});
+      const url=URL.createObjectURL(blob);
+
+      const win=window.open(url,"_blank");
+      if(win){
+        win.addEventListener("load", ()=>{
+          try{ win.focus(); win.print(); }catch(e){}
+        });
+        setTimeout(()=>URL.revokeObjectURL(url), 20000);
+        setStatus("Aperto report: usa stampa/salva PDF se disponibile.", "ok");
+        return;
+      }
+
+      // fallback: stessa finestra
+      window.location.href=url;
+      setTimeout(()=>URL.revokeObjectURL(url), 20000);
+      setStatus("Aperto report: se vuoi PDF, aprilo in Chrome e stampa.", "warn");
+    });
   </script>
 </body>
 </html>
