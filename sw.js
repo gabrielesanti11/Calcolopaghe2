@@ -1,11 +1,11 @@
-const CACHE = "cpaapmal-v1";
+const CACHE = "cpa-apmal-v7"; // <-- cambia numero ogni volta che vuoi forzare update
 const ASSETS = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
   "./pagheicon-192.png",
   "./pagheicon-512.png",
-  "./level-up-08-402152.mp3"
+  // se hai css/js separati aggiungili qui
 ];
 
 self.addEventListener("install", (e) => {
@@ -15,9 +15,12 @@ self.addEventListener("install", (e) => {
 
 self.addEventListener("activate", (e) => {
   e.waitUntil(
-    caches.keys().then(keys => Promise.all(keys.map(k => k !== CACHE ? caches.delete(k) : null)))
+    (async () => {
+      const keys = await caches.keys();
+      await Promise.all(keys.map((k) => (k !== CACHE ? caches.delete(k) : null)));
+      await self.clients.claim();
+    })()
   );
-  self.clients.claim();
 });
 
 self.addEventListener("fetch", (e) => {
