@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>CPA·APMAL – Calcolatore</title>
+  <link rel="pagheicon" href="pagheicon.png">
+<link rel="apple-touch-icon" href="pagheicon.png">
+<meta name="theme-color" content="#0f172a">
+  <meta name="theme-color" content="#0f172a">
+  <style>
+    :root{
+      --bg:#0f172a;
+      --card:#111827;
+      --accent:#0ea5e9;
+      --text:#e2e8f0;
+      --muted:#94a3b8;
+      --ok:#22c55e;
+      --warn:#f97316;
+    }
+    *{box-sizing:border-box;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;}
+    body{margin:0;background:var(--bg);color:var(--text);}
+    .app{max-width:760px;margin:0 auto;padding:18px 14px 120px;}
+    h1{font-size:1.35rem;margin:0 0 4px;}
+    .subtitle{color:var(--muted);font-size:.7rem;margin-bottom:14px;}
+    .card{background:var(--card);border-radius:18px;padding:14px 14px 16px;margin-bottom:14px;border:1px solid rgba(15,23,42,.25);}
+    label{font-size:.7rem;display:block;margin-bottom:5px;}
+    select,input[type="date"],input[type="text"],input[type="time"]{
+      width:100%;
+      background:#0f172a;
+      border:1px solid #1f2937;
+      border-radius:14px;
+      padding:8px 10px;
+      color:var(--text);
+      font-size:.85rem;
+    }
+    .range-line{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:end;margin-bottom:6px;}
+    @media(max-width:540px){.range-line{grid-template-columns:1fr;}}
+    .btn-primary{
+      width:100%;background:var(--accent);border:none;border-radius:16px;padding:11px 0;font-weight:700;color:#fff;font-size:1rem;
+      transition:transform .06s ease, filter .06s ease;
+    }
+    .btn-primary:active{transform:scale(.99);filter:brightness(.95);}
+    .btn-row{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;}
+    .btn-small{flex:1 1 32%;border-radius:14px;padding:9px 0;font-weight:600;font-size:.78rem;border:1px solid rgba(148,163,184,.3);background:rgba(15,23,42,.2);color:var(--text);text-align:center;}
+    .grid-2x2{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;margin-bottom:12px;}
+    .chk-line{display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:.7rem;}
+    .extra-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 12px;margin-bottom:10px;}
+    .extra-box{
+      display:flex;align-items:center;gap:10px;
+      background:rgba(15,23,42,.25);
+      border:1px solid rgba(148,163,184,.05);
+      border-radius:14px;
+      padding:8px 10px;
+    }
+    .extra-title{flex:1;font-size:.76rem;line-height:1.1;}
+    .extra-val{font-variant-numeric:tabular-nums;font-size:.72rem;}
+    .badge-ex{
+      width:44px;height:26px;border-radius:999px;background:rgba(15,23,42,.35);
+      display:flex;justify-content:center;align-items:center;font-size:.6rem;font-weight:700;position:relative;color:#cbd5f5;
+      overflow:visible;
+    }
+    .badge-ex svg{position:absolute;inset:-5px;width:54px;height:36px;pointer-events:none;}
+    .badge-ex svg circle{
+      stroke:transparent;
+      stroke-dasharray:150;
+      stroke-dashoffset:150;
+      stroke-linecap:round;
+    }
+    .badge-ex.active svg circle{
+      stroke:var(--ok);
+      transition:stroke-dashoffset .45s ease-out;
+      stroke-dashoffset:0;
+    }
+    .extra-row{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid rgba(148,163,184,.04);}
+    .extra-row:last-child{border-bottom:none;}
+    .tot-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(148,163,184,.05);font-size:.78rem;}
+    .tot-row:last-child{border-bottom:none;}
+    .rules{font-size:.65rem;color:var(--muted);margin-top:6px;}
+    .small-hint{font-size:.63rem;color:var(--muted);margin-top:4px;}
+    .taglist{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;}
+    .tag{background:rgba(148,163,184,.08);border:1px solid rgba(148,163,184,.12);border-radius:999px;padding:2px 10px;font-size:.6rem;}
+    .disabled{opacity:.4;pointer-events:none;}
+    #status-msg{font-size:.7rem;margin-top:6px;color:var(--muted);}
+    #status-msg.warn{color:var(--warn);}
+    #status-msg.ok{color:var(--ok);}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <h1>CPA·APMAL</h1>
+
+    <!-- PRODUZIONE / LAVORATORE / INTERVALLO -->
+    <div class="card">
+      <label for="prod-name">Produzione</label>
+      <input id="prod-name" type="text">
+
+      <label for="worker-name" style="margin-top:8px;">Nome lavoratore</label>
+      <input id="worker-name" type="text">
+
+      <label for="role" style="margin-top:8px;">Ruolo / Profilo</label>
+      <select id="role">
+        <option value="capo-ele">Capo Elettricista</option>
+        <option value="capo-mac">Capo Macchinista</option>
+        <option value="capo-att">Capo Attrezzista</option>
+        <option value="assist-ele">Assistente Elettricista</option>
+        <option value="assist-mac">Assistente Macchinista</option>
+        <option value="operator">Operatore mdp / Steady</option>
+        <option value="assist-cam">1AC / Focus Puller</option>
+        <option value="dit">DIT / Video Assist</option>
+        <option value="aiuto-op">2AC / Loader</option>
+        <option value="cable">Cable Man</option>
+      </select>
+
+      <label style="margin-top:10px;">Calendario lavoro</label>
+      <div class="range-line">
+        <div>
+          <label for="range-start">Data inizio lavoro</label>
+          <input id="range-start" type="date">
+        </div>
+        <div>
+          <label for="range-end">Data fine lavoro</label>
+          <input id="range-end" type="date">
+        </div>
+        <button class="btn-small" id="genRangeBtn" style="margin-top:0;">Genera</button>
+      </div>
+      <div id="plan-tags" class="taglist"></div>
+
+      <label for="date" style="margin-top:8px;">Data (che stai compilando ora)</label>
+      <input id="date" type="date">
+      <p class="small-hint">Compila e “+ Aggiungi giornata” per TUTTE le date generate. Solo dopo puoi fare riepilogo/PDF.</p>
+    </div>
+
+    <!-- ORARI + mezza giornata + 9+1 + 30% fattura -->
+    <div class="card">
+      <div class="chk-line" style="margin-bottom:6px;">
+        <input type="checkbox" id="half-day">
+        <label for="half-day">Mezza giornata (½ paga, senza orari né extra)</label>
+      </div>
+
+      <div class="chk-line" style="margin-bottom:6px;">
+        <input type="checkbox" id="nine-plus-one">
+        <label for="nine-plus-one">9+1 (base 9h di lavoro + 1h di pausa)</label>
+      </div>
+
+      <div class="chk-line" style="margin-bottom:12px;">
+        <input type="checkbox" id="fattura-30">
+        <label for="fattura-30">+ 30% in fattura</label>
+      </div>
+
+      <div class="grid-2x2" id="time-grid">
+        <div>
+          <label for="start">Inizio set</label>
+          <input id="start" type="time" step="900">
+        </div>
+        <div>
+          <label for="pstart">Inizio pausa</label>
+          <input id="pstart" type="time" step="900">
+        </div>
+        <div>
+          <label for="pend">Fine pausa</label>
+          <input id="pend" type="time" step="900">
+        </div>
+        <div>
+          <label for="end">Fine set</label>
+          <input id="end" type="time" step="900">
+        </div>
+      </div>
+      <button class="btn-primary" id="calcBtn" onclick="onCalcClick()">CALCOLA</button>
+      <div class="btn-row">
+        <button class="btn-small" id="addDayBtn">+ Aggiungi giornata</button>
+        <button class="btn-small" id="showReportBtn">Riepilogo giornate</button>
+        <button class="btn-small" id="savePdfBtn">Salva PDF</button>
+      </div>
+    </div>
+
+    <!-- EXTRA 2x2 -->
+    <div class="card" id="extra-card">
+      <div class="chk-line">
+        <input type="checkbox" id="rounder">
+        <label for="rounder">Arrotonda straordinari a scatti di 0:30</label>
+      </div>
+
+      <div class="extra-grid">
+        <div class="extra-box" data-key="day-simple">
+          <div class="badge-ex">
+            EX
+            <svg viewBox="0 0 100 50"><circle cx="50" cy="25" r="19" stroke-width="3" fill="none"></circle></svg>
+          </div>
+          <div class="extra-title">Extra singolo</div>
+          <div class="extra-val" id="ex-simple">0:00</div>
+        </div>
+        <div class="extra-box" data-key="day-double">
+          <div class="badge-ex">
+            EX
+            <svg viewBox="0 0 100 50"><circle cx="50" cy="25" r="19" stroke-width="3" fill="none"></circle></svg>
+          </div>
+          <div class="extra-title">Extra doppio</div>
+          <div class="extra-val" id="ex-double">0:00</div>
+        </div>
+        <div class="extra-box" data-key="night-simple">
+          <div class="badge-ex">
+            EX
+            <svg viewBox="0 0 100 50"><circle cx="50" cy="25" r="19" stroke-width="3" fill="none"></circle></svg>
+          </div>
+          <div class="extra-title">Notturno singolo</div>
+          <div class="extra-val" id="ex-night">0:00</div>
+        </div>
+        <div class="extra-box" data-key="night-double">
+          <div class="badge-ex">
+            EX
+            <svg viewBox="0 0 100 50"><circle cx="50" cy="25" r="19" stroke-width="3" fill="none"></circle></svg>
+          </div>
+          <div class="extra-title">Notturno doppio</div>
+          <div class="extra-val" id="ex-night-double">0:00</div>
+        </div>
+      </div>
+
+      <div class="extra-row" data-key="pause-miss">
+        <div class="badge-ex">
+          EX
+          <svg viewBox="0 0 100 50"><circle cx="50" cy="25" r="19" stroke-width="3" fill="none"></circle></svg>
+        </div>
+        <div class="extra-title">Mancata pausa (+1h semplice)</div>
+        <div class="extra-val" id="ex-pause">0:00</div>
+      </div>
+      <div class="extra-row" data-key="cont">
+        <div class="badge-ex">
+          EX
+          <svg viewBox="0 0 100 50"><circle cx="50" cy="25" r="19" stroke-width="3" fill="none"></circle></svg>
+        </div>
+        <div class="extra-title">Continuato (base 7h)</div>
+        <div class="extra-val" id="ex-cont">NO</div>
+      </div>
+    </div>
+
+    <!-- TOTALE -->
+    <div class="card">
+      <div class="tot-row"><span>Lordo base turno</span><span id="tot-base">€ 0,00</span></div>
+      <div class="tot-row"><span>Extra semplice</span><span id="tot-simple">€ 0,00</span></div>
+      <div class="tot-row"><span>Extra doppio</span><span id="tot-double">€ 0,00</span></div>
+      <div class="tot-row"><span>Extra notturno</span><span id="tot-night">€ 0,00</span></div>
+      <div class="tot-row" style="font-weight:700;"><span>TOTALE LORDO</span><span id="tot-all">€ 0,00</span></div>
+    </div>
+
+    <p class="rules"></p>
+    <p id="status-msg"></p>
+  </div>
+
+  <audio id="coin-snd" src="level-up-08-402152.mp3" preload="auto"></audio>
+
+  <script>
+    /* PWA minimo */
+    (function(){
+      const manifest={name:"CPA APMAL",short_name:"CPA APMAL",start_url:".",display:"standalone",background_color:"#0f172a",theme_color:"#0f172a"};
+      const blob=new Blob([JSON.stringify(manifest)],{type:"application/json"});
+      const murl=URL.createObjectURL(blob);
+      const link=document.createElement("link");
+      link.rel="manifest";link.href=murl;document.head.appendChild(link);
+      if("serviceWorker" in navigator){
+        const swBlob=new Blob(["self.addEventListener('install',e=>self.skipWaiting());"],{type:"text/javascript"});
+        navigator.serviceWorker.register(URL.createObjectURL(swBlob));
+      }
+    })();
+
+    function setStatus(msg, type){
+      const el=document.getElementById("status-msg");
+      el.textContent=msg||"";
+      el.classList.remove("warn","ok");
+      if(type) el.classList.add(type);
+    }
+
+    function strToLocalDate(str){
+      const [y,m,d]=str.split("-").map(Number);
+      return new Date(y, m-1, d);
+    }
+    function dateToStr(d){
+      const y=d.getFullYear();
+      const m=String(d.getMonth()+1).padStart(2,"0");
+      const dd=String(d.getDate()).padStart(2,"0");
+      return `${y}-${m}-${dd}`;
+    }
+
+    function hhmmToMin(s){
+      const [h,m]=s.split(":").map(Number);
+      return h*60+m;
+    }
+    function minToHHMM(m){
+      const h=Math.floor(m/60),mm=m%60;
+      return h+":"+String(mm).padStart(2,"0");
+    }
+    function euro(v){
+      return "€ "+v.toFixed(2).replace(".",",");
+    }
+
+    const roles={
+      "capo-ele":{label:"Capo Elettricista",base:370,s:65,d:130,n:90,nightBase:500,nightSimple:90,nightDouble:180},
+      "capo-mac":{label:"Capo Macchinista",base:370,s:65,d:130,n:90,nightBase:500,nightSimple:90,nightDouble:180},
+      "capo-att":{label:"Capo Attrezzista",base:370,s:65,d:130,n:90,nightBase:500,nightSimple:90,nightDouble:180},
+
+      /* Assistenti come 2AC / aiuto-ele */
+      "assist-ele":{label:"Assistente Elettricista",base:300,s:50,d:100,n:70},
+      "assist-mac":{label:"Assistente Macchinista",base:300,s:50,d:100,n:70},
+
+      "operator":{label:"Operatore mdp / Steady",base:600,s:100,d:200,n:135},
+      "assist-cam":{label:"1AC / Focus Puller",base:370,s:65,d:130,n:90},
+      "dit":{label:"DIT / Video Assist",base:340,s:60,d:120,n:80},
+      "aiuto-op":{label:"2AC / Loader",base:300,s:50,d:100,n:70},
+      "cable":{label:"Cable Man",base:180,s:30,d:60,n:40},
+    };
+
+    function setAnim(key,on){
+      const el=document.querySelector('[data-key="'+key+'"]');
+      if(!el)return;
+      const badge=el.querySelector(".badge-ex");
+      const circle=el.querySelector("svg circle");
+      if(!badge||!circle)return;
+      if(on){
+        circle.style.transition="none";
+        circle.style.strokeDashoffset=150;
+        badge.classList.add("active");
+        requestAnimationFrame(()=>{
+          circle.style.transition="stroke-dashoffset .45s ease-out";
+          circle.style.strokeDashoffset=0;
+        });
+      }else{
+        badge.classList.remove("active");
+        circle.style.transition="none";
+        circle.style.strokeDashoffset=150;
+      }
+    }
+
+    let lastExtraMoney=0;
+    let lastCalcSnapshot=null;
+    const daysByWorker={};
+    let plannedDates=[];
+
+    // inizializza date e orari di default
+    (function(){
+      const d=new Date();
+      const t=d.toISOString().slice(0,10);
+      document.getElementById("date").value=t;
+      document.getElementById("range-start").value=t;
+      document.getElementById("range-end").value=t;
+      document.getElementById("start").value="08:00";
+      document.getElementById("pstart").value="13:00";
+      document.getElementById("pend").value="14:00";
+      document.getElementById("end").value="19:00";
+    })();
+
+    document.getElementById("genRangeBtn").addEventListener("click",()=>{
+      const s=document.getElementById("range-start").value;
+      const e=document.getElementById("range-end").value;
+      if(!s||!e){
+        setStatus("Seleziona inizio e fine lavoro.", "warn");
+        return;
+      }
+      const sd=strToLocalDate(s);
+      const ed=strToLocalDate(e);
+      if(sd>ed){
+        setStatus("La data di fine deve essere dopo quella di inizio.", "warn");
+        return;
+      }
+      plannedDates=[];
+      const cur=new Date(sd);
+      while(cur<=ed){
+        plannedDates.push(dateToStr(cur));
+        cur.setDate(cur.getDate()+1);
+      }
+      renderPlanTags();
+      document.getElementById("date").value=plannedDates[0]||s;
+      setStatus("Intervallo generato.", "ok");
+    });
+
+    function renderPlanTags(){
+      const box=document.getElementById("plan-tags");
+      box.innerHTML="";
+      plannedDates.forEach(d=>{
+        const span=document.createElement("span");
+        span.className="tag";
+        span.textContent=d;
+        box.appendChild(span);
+      });
+    }
+
+    // Mutua esclusione: Mezza giornata <-> 9+1
+    const halfEl = document.getElementById("half-day");
+    const nineEl = document.getElementById("nine-plus-one");
+
+    halfEl.addEventListener("change",function(){
+      const on=this.checked;
+      const grid=document.getElementById("time-grid");
+      if(on){
+        if(nineEl.checked) nineEl.checked=false;
+        grid.classList.add("disabled");
+      }else{
+        grid.classList.remove("disabled");
+      }
+    });
+
+    nineEl.addEventListener("change",function(){
+      if(this.checked && halfEl.checked){
+        halfEl.checked=false;
+        document.getElementById("time-grid").classList.remove("disabled");
+      }
+    });
+
+    function onCalcClick(){
+      doCalc();
+    }
+
+    function doCalc(){
+      setStatus("");
+      const roleId=document.getElementById("role").value;
+      const rounder=document.getElementById("rounder").checked;
+      const fattura=document.getElementById("fattura-30").checked;
+      const ninePlusOne=document.getElementById("nine-plus-one").checked;
+      const r=roles[roleId];
+
+      if(!r){
+        setStatus("Tariffe mancanti per il ruolo selezionato.", "warn");
+        return;
+      }
+
+      const half=document.getElementById("half-day").checked;
+
+      // MEZZA GIORNATA
+      if(half){
+        ["day-simple","day-double","night-simple","night-double","pause-miss","cont"].forEach(k=>setAnim(k,false));
+        let basePay=r.base/2;
+        let total=basePay;
+        if(fattura){
+          total = total * 1.3;
+        }
+
+        document.getElementById("ex-simple").textContent="0:00";
+        document.getElementById("ex-double").textContent="0:00";
+        document.getElementById("ex-night").textContent="0:00";
+        document.getElementById("ex-night-double").textContent="0:00";
+        document.getElementById("ex-pause").textContent="0:00";
+        document.getElementById("ex-cont").textContent="NO";
+
+        document.getElementById("tot-base").textContent=euro(r.base/2);
+        document.getElementById("tot-simple").textContent="€ 0,00";
+        document.getElementById("tot-double").textContent="€ 0,00";
+        document.getElementById("tot-night").textContent="€ 0,00";
+        document.getElementById("tot-all").textContent=euro(total);
+
+        lastExtraMoney=0;
+
+        lastCalcSnapshot={
+          prod:document.getElementById("prod-name").value.trim(),
+          worker:document.getElementById("worker-name").value.trim()||"Senza nome",
+          roleId,
+          date:document.getElementById("date").value,
+          start:"MEZZA",
+          pstart:"MEZZA",
+          pend:"MEZZA",
+          end:"MEZZA",
+          total:total,
+          half:true,
+          fattura:fattura
+        };
+        return;
+      }
+
+      // ORARI
+      let startVal=document.getElementById("start").value;
+      let pstartVal=document.getElementById("pstart").value;
+      let pendVal=document.getElementById("pend").value;
+      let endVal=document.getElementById("end").value;
+
+      if(!startVal || !endVal){
+        setStatus("Inserisci almeno orario di inizio e fine set.", "warn");
+        return;
+      }
+
+      let start=hhmmToMin(startVal);
+      let pstart=pstartVal?hhmmToMin(pstartVal):start;
+      let pend=pendVal?hhmmToMin(pendVal):pstart;
+      let end=hhmmToMin(endVal);
+      if(end<start)end+=24*60;
+
+      const dayIsNight=(start>=16*60);
+
+      const hasPause=pstart<pend;
+      const workBefore=hasPause?Math.max(0,pstart-start):Math.max(0,end-start);
+      const workAfter =hasPause?Math.max(0,end-pend):0;
+      const totalWork=workBefore+workAfter;
+
+      const cont=(!hasPause)||(pstart-start>7*60);
+      document.getElementById("ex-cont").textContent=cont?"SI":"NO";
+      setAnim("cont",cont);
+
+      // ✅ BASE MINUTES:
+      // - Continuato: 7h (come prima)
+      // - Normale: 8h oppure 9h se attivo 9+1
+      const baseMinutes = cont ? 7*60 : (ninePlusOne ? 9*60 : 8*60);
+
+      let overtime=Math.max(0,totalWork-baseMinutes);
+
+      // NOTTURNO: minuti dopo le 22:00
+      const nightStart=22*60;
+      let nightMin=0;
+      const intervals=hasPause?[[start,pstart],[pend,end]]:[[start,end]];
+      intervals.forEach(([a,b])=>{
+        if(b<=nightStart)return;
+        const from=Math.max(a,nightStart);
+        if(b>from)nightMin+=b-from;
+      });
+      let nightExtra=Math.min(overtime,nightMin);
+      overtime-=nightExtra;
+
+      let extraSimple=0,extraDouble=0;
+      if(overtime>0){
+        const sPart=Math.min(overtime,120); // prime 2h straordinario semplice
+        extraSimple=sPart;
+        overtime-=sPart;
+        if(overtime>0)extraDouble=overtime; // resto doppio
+      }
+
+      let missMin=0;
+      if(!hasPause)missMin=60; // mancata pausa = 1h semplice
+
+      function round30(m){if(!rounder)return m;return Math.floor(m/30)*30;}
+      nightExtra=round30(nightExtra);
+      extraSimple=round30(extraSimple);
+      extraDouble=round30(extraDouble);
+
+      // nessun notturno doppio separato (gestito in tariffa)
+      document.getElementById("ex-night-double").textContent="0:00";
+      setAnim("night-double",false);
+
+      document.getElementById("ex-simple").textContent=minToHHMM(extraSimple);
+      setAnim("day-simple",extraSimple>0);
+      document.getElementById("ex-double").textContent=minToHHMM(extraDouble);
+      setAnim("day-double",extraDouble>0);
+      document.getElementById("ex-night").textContent=minToHHMM(nightExtra);
+      setAnim("night-simple",nightExtra>0);
+      document.getElementById("ex-pause").textContent=missMin?"1:00":"0:00";
+      setAnim("pause-miss",missMin>0);
+
+      // tariffe base / notturno
+      let basePay=r.base, rateSimple=r.s, rateDouble=r.d;
+      if(dayIsNight && r.nightBase){
+        basePay=r.nightBase;
+        rateSimple=r.nightSimple;
+        rateDouble=r.nightDouble;
+      }
+
+      let total=basePay;
+      const moneySimple=rateSimple*(extraSimple/60);
+      const moneyDouble=rateDouble*(extraDouble/60);
+      const moneyNight =r.n*(nightExtra/60);
+      const moneyMiss  =missMin?rateSimple:0;
+      total+=moneySimple+moneyDouble+moneyNight+moneyMiss;
+
+      if(fattura){
+        total = total * 1.3;
+      }
+
+      document.getElementById("tot-base").textContent=euro(basePay);
+      document.getElementById("tot-simple").textContent=euro(moneySimple+moneyMiss);
+      document.getElementById("tot-double").textContent=euro(moneyDouble);
+      document.getElementById("tot-night").textContent=euro(moneyNight);
+      document.getElementById("tot-all").textContent=euro(total);
+
+      const extraMoneyNow=moneySimple+moneyDouble+moneyNight+moneyMiss;
+      if(extraMoneyNow>lastExtraMoney){
+        const a=document.getElementById("coin-snd");
+        if(a){a.currentTime=0;a.play().catch(()=>{});}
+      }
+      lastExtraMoney=extraMoneyNow;
+
+      lastCalcSnapshot={
+        prod:document.getElementById("prod-name").value.trim(),
+        worker:document.getElementById("worker-name").value.trim()||"Senza nome",
+        roleId,
+        date:document.getElementById("date").value,
+        start:startVal,
+        pstart:pstartVal||"-",
+        pend:pendVal||"-",
+        end:endVal,
+        total:total,
+        half:false,
+        fattura:fattura,
+        ninePlusOne:ninePlusOne
+      };
+    }
+
+    document.getElementById("calcBtn").addEventListener("click", onCalcClick);
+
+    function nextMissingDate(){
+      const saved=new Set();
+      Object.values(daysByWorker).forEach(arr=>arr.forEach(r=>saved.add(r.date)));
+      for(const d of plannedDates){
+        if(!saved.has(d)) return d;
+      }
+      return null;
+    }
+
+    document.getElementById("addDayBtn").addEventListener("click",()=>{
+      if(!lastCalcSnapshot){doCalc();}
+      if(!lastCalcSnapshot){
+        setStatus("Fai prima il calcolo per la giornata corrente.", "warn");
+        return;
+      }
+      const w=lastCalcSnapshot.worker;
+      if(!daysByWorker[w])daysByWorker[w]=[];
+
+      const idx = daysByWorker[w].findIndex(x=>x.date===lastCalcSnapshot.date);
+      if(idx !== -1){
+        daysByWorker[w][idx] = {...lastCalcSnapshot};
+        setStatus("Giornata aggiornata: "+lastCalcSnapshot.date, "ok");
+      }else{
+        daysByWorker[w].push({...lastCalcSnapshot});
+        setStatus("Giornata aggiunta: "+lastCalcSnapshot.date, "ok");
+      }
+
+      const nextDate=nextMissingDate();
+      if(nextDate){
+        document.getElementById("date").value=nextDate;
+      }
+    });
+
+    function allPlannedDatesCovered(){
+      if(plannedDates.length===0)return true;
+      const saved=new Set();
+      Object.values(daysByWorker).forEach(arr=>arr.forEach(r=>saved.add(r.date)));
+      for(const d of plannedDates){
+        if(!saved.has(d)) return false;
+      }
+      return true;
+    }
+
+    function buildReportHtml(){
+      const prodName=document.getElementById("prod-name").value.trim()||"Produzione";
+      const allDates=new Set();
+      Object.values(daysByWorker).forEach(arr=>arr.forEach(r=>allDates.add(r.date)));
+      const sortedDates=Array.from(allDates).sort();
+      const rangeLabel=sortedDates.length?(sortedDates.length===1?sortedDates[0]:sortedDates[0]+" – "+sortedDates[sortedDates.length-1]):"";
+      let html="<!DOCTYPE html><html><head><meta charset='UTF-8'><title>Riepilogo</title><style>body{font-family:system-ui,-apple-system,sans-serif;padding:18px 14px;}h2{margin-bottom:2px;}h3{margin-bottom:3px;}hr{margin:10px 0;}p{margin:2px 0;} .tot{font-weight:700;margin-top:4px;}</style></head><body>";
+      html+="<h2>"+prodName+(rangeLabel?" – "+rangeLabel:"")+"</h2>";
+      for(const worker in daysByWorker){
+        const entries=daysByWorker[worker];
+        if(!entries.length)continue;
+        html+="<h3>"+worker+"</h3>";
+        let partial=0;
+        entries.sort((a,b)=>a.date.localeCompare(b.date));
+        entries.forEach((d,i)=>{
+          const roleLabel=roles[d.roleId]?roles[d.roleId].label:d.roleId;
+          partial+=d.total;
+          html+="<p><strong>Giorno "+(i+1)+" – "+d.date+"</strong></p>";
+          html+="<p>Ruolo: "+roleLabel+"</p>";
+          if(d.half){
+            html+="<p>Mezza giornata</p>";
+          }else{
+            const nineTag = d.ninePlusOne ? " • 9+1" : "";
+            html+="<p>Inizio: "+d.start+" • Pausa: "+d.pstart+"-"+d.pend+" • Fine: "+d.end + nineTag + "</p>";
+          }
+          html+="<p>€ "+d.total.toFixed(2).replace(".",",")+"</p><hr>";
+        });
+        html+="<p class='tot'>Totale "+worker+": € "+partial.toFixed(2).replace(".",",")+"</p><br>";
+      }
+      html+="</body></html>";
+      return html;
+    }
+
+    document.getElementById("showReportBtn").addEventListener("click",()=>{
+      if(!allPlannedDatesCovered()){
+        setStatus("Completa tutte le giornate generate prima del riepilogo.", "warn");
+        return;
+      }
+      const win=window.open("","_blank");
+      win.document.write(buildReportHtml());
+      win.document.close();
+      setStatus("Riepilogo aperto in nuova scheda.", "ok");
+    });
+
+    document.getElementById("savePdfBtn").addEventListener("click",()=>{
+      if(!allPlannedDatesCovered()){
+        setStatus("Completa tutte le giornate generate prima di salvare il PDF.", "warn");
+        return;
+      }
+      const rpt=buildReportHtml();
+      const win=window.open("","_blank");
+      win.document.write(rpt);
+      win.document.close();
+      win.focus();
+      win.print();
+      setStatus("Usa la funzione stampa/salva PDF del browser.", "ok");
+    });
+  </script>
+</body>
+</html>
